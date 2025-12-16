@@ -6,10 +6,11 @@ import java.math.BigDecimal;
 
 public class ShoppingCartItem
 {
-    private Product product = null;
+    private Product product;
     private int quantity = 1;
-    private BigDecimal discountPercent = BigDecimal.ZERO;
 
+    // 0.10 = 10% discount
+    private BigDecimal discountPercent = BigDecimal.ZERO;
 
     public Product getProduct()
     {
@@ -28,7 +29,7 @@ public class ShoppingCartItem
 
     public void setQuantity(int quantity)
     {
-        this.quantity = quantity;
+        this.quantity = Math.max(1, quantity);
     }
 
     public BigDecimal getDiscountPercent()
@@ -44,15 +45,15 @@ public class ShoppingCartItem
     @JsonIgnore
     public int getProductId()
     {
-        return this.product.getProductId();
+        return product != null ? product.getProductId() : 0;
     }
 
     public BigDecimal getLineTotal()
     {
         BigDecimal basePrice = product.getPrice();
-        BigDecimal quantity = new BigDecimal(this.quantity);
+        BigDecimal qty = BigDecimal.valueOf(quantity);
 
-        BigDecimal subTotal = basePrice.multiply(quantity);
+        BigDecimal subTotal = basePrice.multiply(qty);
         BigDecimal discountAmount = subTotal.multiply(discountPercent);
 
         return subTotal.subtract(discountAmount);

@@ -39,19 +39,13 @@ public class ShoppingCartController
     @GetMapping
     public ShoppingCart getCart(Principal principal)
     {
-        String userName = principal.getName();
-        User user = userDao.getByUserName(userName);
-
-        if (user == null)
-        {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-
+        User user = userDao.getByUserName(principal.getName());
         return shoppingCartDao.getByUserId(user.getId());
     }
 
     // POST /cart/products/{productId}
     @PostMapping("/products/{productId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public void addProduct(
             @PathVariable int productId,
             Principal principal)
@@ -59,11 +53,9 @@ public class ShoppingCartController
         User user = userDao.getByUserName(principal.getName());
 
         if (productDao.getById(productId) == null)
-        {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
-        }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        shoppingCartDao.addProduct(user.getId(), productId, 1);
+        shoppingCartDao.addProduct(user.getId(), productId);
     }
 
     // PUT /cart/products/{productId}
@@ -75,12 +67,7 @@ public class ShoppingCartController
     {
         User user = userDao.getByUserName(principal.getName());
 
-        if (item.getQuantity() <= 0)
-        {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be greater than 0");
-        }
-
-        shoppingCartDao.updateProduct(
+        shoppingCartDao.updateQuantity(
                 user.getId(),
                 productId,
                 item.getQuantity()
@@ -89,6 +76,7 @@ public class ShoppingCartController
 
     // DELETE /cart
     @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void clearCart(Principal principal)
     {
         User user = userDao.getByUserName(principal.getName());

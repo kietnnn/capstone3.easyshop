@@ -28,9 +28,9 @@ public class ProductsController
     @GetMapping
     public List<Product> search(
             @RequestParam(name = "cat", required = false) Integer categoryId,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) String subCategory)
+            @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
+            @RequestParam(name = "subCategory", required = false) String subCategory)
     {
         return productDao.search(categoryId, minPrice, maxPrice, subCategory);
     }
@@ -62,14 +62,8 @@ public class ProductsController
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProduct(@PathVariable int id, @RequestBody Product product)
     {
-        Product existing = productDao.getById(id);
-        if (existing == null)
-        {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
-        product.setProductId(id);
-        productDao.update(id, product);
+        product.setProductId(id);     // 🔑 critical fix
+        productDao.update(id, product); // 🔑 critical fix
     }
 
     // DELETE /products/{id} (ADMIN)
@@ -83,7 +77,6 @@ public class ProductsController
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-
         productDao.delete(id);
     }
 }
