@@ -8,59 +8,80 @@ import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.data.UserDao;
 import org.yearup.models.ShoppingCart;
-import org.yearup.models.ShoppingCartItem;
 import org.yearup.models.User;
 
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/cart")
+@RequestMapping("cart")
 @CrossOrigin
 @PreAuthorize("isAuthenticated()")
 public class ShoppingCartController
 {
-    private final ShoppingCartDao shoppingCartDao;
-    private final UserDao userDao;
+    private ShoppingCartDao shoppingCartDao;
+    private UserDao userDao;
 
     @Autowired
-    public ShoppingCartController(
-            ShoppingCartDao shoppingCartDao,
-            UserDao userDao)
+    public ShoppingCartController(ShoppingCartDao shoppingCartDao, UserDao userDao)
     {
         this.shoppingCartDao = shoppingCartDao;
         this.userDao = userDao;
     }
 
-    // PUT /cart/products/{productId}
-    @PutMapping("/products/{productId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateCartItem(
-            @PathVariable int productId,
-            @RequestBody ShoppingCartItem item,
-            Principal principal)
+    @GetMapping
+    public ShoppingCart getCart(Principal principal)
     {
-        // 1. Get logged-in user
-        User user = userDao.getByUserName(principal.getName());
-        if (user == null)
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        try
+        {
+            String username = principal.getName();
+            User user = userDao.getByUserName(username);
 
-        // 2. Get user's cart
-        ShoppingCart cart = shoppingCartDao.getByUserId(user.getId());
-
-        // 3. Only update if product already exists in cart
-        if (!cart.contains(productId))
+            return shoppingCartDao.getByUserId(user.getId());
+        }
+        catch (Exception ex)
         {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Product not found in shopping cart"
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Oops... our bad."
             );
         }
+    }
 
-        // 4. Update quantity in database
-        shoppingCartDao.updateQuantity(
-                user.getId(),
-                productId,
-                item.getQuantity()
-        );
+    @PostMapping("products/{productId}")
+    public void addProduct(@PathVariable int productId, Principal principal)
+    {
+        try
+        {
+            String username = principal.getName();
+            User user = userDao.getByUserName(username);
+
+            shoppingCartDao.addProduct(user.getId(), productId);
+        }
+        catch (Exception ex)
+        {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Oops... our bad."
+            );
+        }
+    }
+
+    @DeleteMapping
+    public void clearCart(Principal principal)
+    {
+        try
+        {
+            String username = principal.getName();
+            User user = userDao.getByUserName(username);
+
+            shoppingCartDao.clearCart(user.getId());
+        }
+        catch (Exception ex)
+        {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Oops... our bad."
+            );
+        }
     }
 }
