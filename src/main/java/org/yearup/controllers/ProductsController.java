@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("products")
 @CrossOrigin
 public class ProductsController
 {
@@ -24,59 +24,68 @@ public class ProductsController
         this.productDao = productDao;
     }
 
-    // GET /products
-    @GetMapping
+    @GetMapping("")
+    @PreAuthorize("permitAll()")
     public List<Product> search(
-            @RequestParam(name = "cat", required = false) Integer categoryId,
-            @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
-            @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
-            @RequestParam(name = "subCategory", required = false) String subCategory)
+            @RequestParam(name="cat", required = false) Integer categoryId,
+            @RequestParam(name="minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(name="maxPrice", required = false) BigDecimal maxPrice,
+            @RequestParam(name="subCategory", required = false) String subCategory)
     {
-        return productDao.search(categoryId, minPrice, maxPrice, subCategory);
+        try
+        {
+            return productDao.search(categoryId, minPrice, maxPrice, subCategory);
+        }
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+        }
     }
 
-    // GET /products/{id}
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
+    @PreAuthorize("permitAll()")
     public Product getById(@PathVariable int id)
     {
-        Product product = productDao.getById(id);
-        if (product == null)
+        try
         {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            Product product = productDao.getById(id);
+            if(product == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            return product;
         }
-        return product;
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+        }
     }
 
-    // POST /products (ADMIN)
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping()
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Product addProduct(@RequestBody Product product)
     {
-        return productDao.create(product);
+        try
+        {
+            return productDao.create(product);
+        }
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+        }
     }
 
-    // PUT /products/{id} (ADMIN)
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateProduct(@PathVariable int id, @RequestBody Product product)
-    {
-        product.setProductId(id);     // 🔑 critical fix
-        productDao.update(id, product); // 🔑 critical fix
-    }
-
-    // DELETE /products/{id} (ADMIN)
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteProduct(@PathVariable int id)
     {
-        Product product = productDao.getById(id);
-        if (product == null)
+        try
         {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            Product product = productDao.getById(id);
+            if(product == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+            productDao.delete(id);
         }
-        productDao.delete(id);
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+        }
     }
 }
