@@ -1,9 +1,10 @@
+package org.yearup.data.mysql;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.yearup.data.ProductDao;
-import org.yearup.data.mysql.MySqlProductsDao;
 import org.yearup.models.Product;
 
 import java.math.BigDecimal;
@@ -19,16 +20,16 @@ public class MySqlProductsDaoTest {
         // 1️⃣ Create H2 in-memory DataSource
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1"); // keep DB alive during tests
+        dataSource.setUrl("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1"); // keep DB alive
         dataSource.setUsername("sa");
         dataSource.setPassword("");
 
         // 2️⃣ Create JdbcTemplate
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
-        // 3️⃣ Create table
+        // 3️⃣ Create products table
         jdbcTemplate.execute("""
-            CREATE TABLE products (
+            CREATE TABLE IF NOT EXISTS products (
                 product_id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255),
                 price DECIMAL(10,2),
@@ -56,7 +57,7 @@ public class MySqlProductsDaoTest {
     public void getById_shouldReturn_theCorrectProduct() {
         Product product = productDao.getById(1);
 
-        assertNotNull(product);
+        assertNotNull(product, "Product should not be null");
         assertEquals(1, product.getProductId());
         assertEquals("Laptop", product.getName());
         assertEquals(new BigDecimal("999.99"), product.getPrice());

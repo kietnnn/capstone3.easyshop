@@ -1,18 +1,18 @@
 package org.yearup.data.mysql;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 import org.yearup.data.ProductDao;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.models.Product;
 import org.yearup.models.ShoppingCart;
 import org.yearup.models.ShoppingCartItem;
 
-import java.util.List;
-
+@Repository
 public class MySqlShoppingCartDao implements ShoppingCartDao
 {
-    private JdbcTemplate jdbcTemplate;
-    private ProductDao productDao;
+    private final JdbcTemplate jdbcTemplate;
+    private final ProductDao productDao;
 
     public MySqlShoppingCartDao(JdbcTemplate jdbcTemplate, ProductDao productDao)
     {
@@ -31,18 +31,18 @@ public class MySqlShoppingCartDao implements ShoppingCartDao
             WHERE user_id = ?
         """;
 
-        List<?> rows = jdbcTemplate.query(sql, (rs, rowNum) -> {
+        jdbcTemplate.query(sql, rs -> {
             int productId = rs.getInt("product_id");
             int quantity = rs.getInt("quantity");
 
             Product product = productDao.getById(productId);
+            if (product == null) return;
 
             ShoppingCartItem item = new ShoppingCartItem();
             item.setProduct(product);
             item.setQuantity(quantity);
 
             cart.add(item);
-            return null;
         }, userId);
 
         return cart;

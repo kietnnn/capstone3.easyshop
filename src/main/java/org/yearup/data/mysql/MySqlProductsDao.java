@@ -19,16 +19,43 @@ public class MySqlProductsDao implements ProductDao
     }
 
     @Override
-    public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String subCategory)
+    public List<Product> search(Integer categoryId,
+                                BigDecimal minPrice,
+                                BigDecimal maxPrice,
+                                String subCategory)
     {
-        String sql = "SELECT * FROM products WHERE 1=1";
-        if (categoryId != null) sql += " AND category_id = " + categoryId;
-        if (minPrice != null) sql += " AND price >= " + minPrice;
-        if (maxPrice != null) sql += " AND price <= " + maxPrice;
-        if (subCategory != null) sql += " AND sub_category = '" + subCategory + "'";
+        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1");
+        List<Object> params = new java.util.ArrayList<>();
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToProduct(rs));
+        if (categoryId != null)
+        {
+            sql.append(" AND category_id = ?");
+            params.add(categoryId);
+        }
+
+        if (minPrice != null)
+        {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null)
+        {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+
+        if (subCategory != null)
+        {
+            sql.append(" AND sub_category = ?");
+            params.add(subCategory);
+        }
+
+        return jdbcTemplate.query(sql.toString(),
+                params.toArray(),
+                (rs, rowNum) -> mapRowToProduct(rs));
     }
+
 
     @Override
     public List<Product> listByCategoryId(int categoryId)
@@ -99,4 +126,28 @@ public class MySqlProductsDao implements ProductDao
         product.setFeatured(rs.getBoolean("featured"));
         return product;
     }
+
+    @Override
+    public void update(int productId, Product product)
+    {
+        String sql = """
+        UPDATE products
+        SET name = ?, price = ?, category_id = ?, description = ?,
+            sub_category = ?, stock = ?, image_url = ?, featured = ?
+        WHERE product_id = ?
+    """;
+
+        jdbcTemplate.update(sql,
+                product.getName(),
+                product.getPrice(),
+                product.getCategoryId(),
+                product.getDescription(),
+                product.getSubCategory(),
+                product.getStock(),
+                product.getImageUrl(),
+                product.isFeatured(),
+                productId
+        );
+    }
+
 }
