@@ -1,5 +1,6 @@
 package org.yearup.security;
 
+import org.springframework.security.authentication.AuthenticationManager;
 import org.yearup.security.jwt.JWTConfigurer;
 import org.yearup.security.jwt.TokenProvider;
 import org.springframework.context.annotation.Bean;
@@ -39,10 +40,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configure paths and requests that should be ignored by Spring Security
-     * @param web
-     */
+    // ✅ THIS IS THE MISSING PIECE
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
     }

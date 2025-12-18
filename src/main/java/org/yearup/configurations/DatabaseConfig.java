@@ -9,20 +9,21 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 
 @Configuration
-public class DatabaseConfig
-{
+public class DatabaseConfig {
+
     @Bean
     public DataSource dataSource(
             @Value("${datasource.url}") String url,
             @Value("${datasource.username}") String username,
-            @Value("${datasource.password}") String password)
-    {
+            @Value("${datasource.password}") String password
+    ) {
         BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
         ds.setUrl(url);
         ds.setUsername(username);
         ds.setPassword(password);
 
-        // Optional but recommended connection pool settings
+        // Connection pool settings
         ds.setInitialSize(5);
         ds.setMaxTotal(10);
         ds.setMaxIdle(5);
