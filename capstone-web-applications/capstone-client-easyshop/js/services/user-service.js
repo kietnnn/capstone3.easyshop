@@ -83,7 +83,7 @@ class UserService {
 
     register (username, password, confirm)
     {
-        const url = `${config.baseUrl}/register`;
+        const url = `${config.baseUrl}/auth/register`;
         const register = {
             username: username,
             password: password,
@@ -107,7 +107,7 @@ class UserService {
 
     login (username, password)
     {
-        const url = `${config.baseUrl}/login`;
+        const url = `${config.baseUrl}/auth/login`;
         const login = {
             username: username,
             password: password
