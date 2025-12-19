@@ -1,31 +1,25 @@
 package org.yearup.controllers;
 
-import javax.validation.Valid;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import org.yearup.models.Profile;
+import org.springframework.web.bind.annotation.*;
+
+
+
 import org.yearup.data.ProfileDao;
 import org.yearup.data.UserDao;
-import org.yearup.models.authentication.LoginDto;
-import org.yearup.models.authentication.LoginResponseDto;
-import org.yearup.models.authentication.RegisterUserDto;
+
 import org.yearup.models.User;
 import org.yearup.models.requests.LoginRequest;
 import org.yearup.models.requests.RegisterRequest;
 import org.yearup.models.responses.LoginResponse;
 import org.yearup.security.JwtUtil;
-import org.yearup.security.jwt.JWTFilter;
-import org.yearup.security.jwt.TokenProvider;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -48,13 +42,24 @@ public class AuthenticationController
         this.authenticationManager = authenticationManager;
     }
 
+    @Transactional
     @PostMapping("/register")
-    public User register(@RequestBody RegisterRequest request)
+    public ResponseEntity<User> register(@RequestBody RegisterRequest request)
     {
+        if (userDao.exists(request.getUsername())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
         User user = userDao.create(request.toUser());
         profileDao.create(request.toProfile(user.getId()));
-        return user;
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(user);
     }
+
+
+
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request)

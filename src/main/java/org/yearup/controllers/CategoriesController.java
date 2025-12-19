@@ -1,10 +1,11 @@
 package org.yearup.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
 import org.yearup.data.CategoryDao;
 import org.yearup.models.Category;
 
@@ -28,29 +29,38 @@ public class CategoriesController
     }
 
     @GetMapping("/{id}")
-    public Category getById(@PathVariable int id)
+    public ResponseEntity<Category> getById(@PathVariable int id)
     {
-        return categoryDao.getById(id);
+        Category category = categoryDao.getById(id);
+
+        if (category == null) {
+            return ResponseEntity.notFound().build();  // Returns 404
+        }
+
+        return ResponseEntity.ok(category);  // Returns 200 with category
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")  // ← Use hasAuthority, not hasRole
     @PostMapping
-    public Category create(@RequestBody Category category)
+    public ResponseEntity<Category> create(@RequestBody Category category)
     {
-        return categoryDao.create(category);
+        Category created = categoryDao.create(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public void update(@PathVariable int id, @RequestBody Category category)
+    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Category category)
     {
         categoryDao.update(id, category);
+        return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id)
+    public ResponseEntity<Void> delete(@PathVariable int id)
     {
         categoryDao.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

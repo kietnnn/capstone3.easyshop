@@ -18,7 +18,7 @@ public class JwtUtil
     {
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("role", user.getRole())
+                .claim("auth", user.getRole())  // ← REMOVED "ROLE_" +
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(key)
@@ -28,6 +28,11 @@ public class JwtUtil
     public String extractUsername(String token)
     {
         return parseToken(token).getBody().getSubject();
+    }
+
+    public String extractAuthority(String token)  // ← New method
+    {
+        return (String) parseToken(token).getBody().get("auth");
     }
 
     public boolean isTokenValid(String token)

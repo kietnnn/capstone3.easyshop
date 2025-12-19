@@ -20,21 +20,31 @@ public class MySqlUserDao implements UserDao
     }
 
     @Override
-    public User create(User newUser)
-    {
+    public User create(User newUser) {
+        // Make sure to insert role as a string
         String sql = """
-            INSERT INTO users (username, hashed_password, role)
-            VALUES (?, ?, ?)
-        """;
+        INSERT INTO users (username, hashed_password, role)
+        VALUES (?, ?, ?)
+    """;
 
+        // Hardcode role as "USER" for new users
         jdbcTemplate.update(sql,
                 newUser.getUsername(),
                 passwordEncoder.encode(newUser.getPassword()),
-                newUser.getRole()
+                "USER"   // insert default role
         );
 
-        return getByUserName(newUser.getUsername());
+        // Query back the user to ensure it exists
+        User user = getByUserName(newUser.getUsername());
+
+        if (user == null) {
+            // This should never happen if DB and query are correct
+            throw new RuntimeException("User inserted but cannot be found: " + newUser.getUsername());
+        }
+
+        return user;
     }
+
 
     @Override
     public List<User> getAll()
