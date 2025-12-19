@@ -12,13 +12,13 @@ import java.util.Date;
 public class JwtUtil
 {
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
+    private final long EXPIRATION = 1000 * 60 * 60 * 10;
 
     public String generateToken(User user)
     {
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("auth", user.getRole())  // ← REMOVED "ROLE_" +
+                .claim("auth", user.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(key)
@@ -30,7 +30,7 @@ public class JwtUtil
         return parseToken(token).getBody().getSubject();
     }
 
-    public String extractAuthority(String token)  // ← New method
+    public String extractAuthority(String token)
     {
         return (String) parseToken(token).getBody().get("auth");
     }

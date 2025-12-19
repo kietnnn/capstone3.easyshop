@@ -117,5 +117,5 @@ public class RegisterRequest {
         this.zip = zip;
     }
 
-    // Getters & Setters for all fields...
+
 }

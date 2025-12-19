@@ -98,7 +98,6 @@ public class MySqlProductsDao implements ProductDao
                 product.isFeatured()
         );
 
-        // Get last inserted ID
         Integer id = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
         product.setProductId(id);
         return product;
@@ -111,7 +110,6 @@ public class MySqlProductsDao implements ProductDao
         jdbcTemplate.update(sql, productId);
     }
 
-    // Helper method to map ResultSet to Product
     private Product mapRowToProduct(java.sql.ResultSet rs) throws java.sql.SQLException
     {
         Product product = new Product();
@@ -120,7 +118,6 @@ public class MySqlProductsDao implements ProductDao
         product.setPrice(rs.getBigDecimal("price"));
         product.setCategoryId(rs.getInt("category_id"));
         product.setDescription(rs.getString("description"));
-        product.setSubCategory(rs.getString("sub_category"));
         product.setStock(rs.getInt("stock"));
         product.setImageUrl(rs.getString("image_url"));
         product.setFeatured(rs.getBoolean("featured"));

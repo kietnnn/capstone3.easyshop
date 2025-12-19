@@ -61,6 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {  // ← Ke
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+                .cors().and()
                 .csrf().disable()
 
                 .exceptionHandling()
@@ -75,9 +76,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {  // ← Ke
                 .authorizeRequests()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/categories/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/products/**").permitAll()   // ✅ FIX
                 .anyRequest().authenticated()
                 .and()
 
-                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);  // ← Changed
+                .addFilterBefore(
+                        new JWTFilter(jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class
+                );
     }
 }

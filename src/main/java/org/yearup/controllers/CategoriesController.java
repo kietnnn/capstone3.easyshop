@@ -34,13 +34,13 @@ public class CategoriesController
         Category category = categoryDao.getById(id);
 
         if (category == null) {
-            return ResponseEntity.notFound().build();  // Returns 404
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(category);  // Returns 200 with category
+        return ResponseEntity.ok(category);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")  // ← Use hasAuthority, not hasRole
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<Category> create(@RequestBody Category category)
     {

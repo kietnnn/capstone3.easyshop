@@ -21,5 +21,5 @@ public class LoginRequest
         this.password = password;
     }
 
-    // getters + setters
+
 }

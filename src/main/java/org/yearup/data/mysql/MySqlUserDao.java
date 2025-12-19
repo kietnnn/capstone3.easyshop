@@ -27,18 +27,18 @@ public class MySqlUserDao implements UserDao
         VALUES (?, ?, ?)
     """;
 
-        // Hardcode role as "USER" for new users
+
         jdbcTemplate.update(sql,
                 newUser.getUsername(),
                 passwordEncoder.encode(newUser.getPassword()),
                 "USER"   // insert default role
         );
 
-        // Query back the user to ensure it exists
+
         User user = getByUserName(newUser.getUsername());
 
         if (user == null) {
-            // This should never happen if DB and query are correct
+
             throw new RuntimeException("User inserted but cannot be found: " + newUser.getUsername());
         }
 
