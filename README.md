@@ -10,8 +10,7 @@
 *      An informative database of products, 
 *      Insomnia testing, 
 *      Application progress. 
-
-* The original program ( before fixing - only starter )
+*  The original program ( before fixing - only starter ) :https://github.com/kietnnn/capstoneTest1
 ## 1. THE FIXED
 -     DatabaseConfig
 -     AuthenticationController, CategoriesController
@@ -24,6 +23,7 @@
 -     ShoppingCartController
 -     Website Functions (Profile, login, product, pictures,...)
 -     Application run 
+
 
 
 
